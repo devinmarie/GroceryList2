@@ -1,0 +1,212 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Lally Shopping List";
+}
+
+<h1>Grocery Shopping List</h1>
+
+<div>
+    <hr />
+    <form id="createShoppingListForm" class="form">
+        <h3>Add to the List</h3>
+        <div class="form-group">
+            <label for="productName">Product Name</label>
+            <input type="text" class="form-control" id="productName" placeholder="Name of Grocery Item" />
+        </div>
+        <div class="form-group">
+            <label for="productQty">Product Qty</label>
+            <input type="text" class="form-control" id="productQty" placeholder="Qty of Grocery Item" />
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+<hr />
+<h3>Grocery Items Needed</h3>
+<ul id="glist">
+</ul>
+<hr />
+<h3>Grocery Items Purchased</h3>
+<ul id="gpurchase">
+</ul>
+
+
+@section Scripts {
+    <script>
+
+        $(function () {
+            loadData();
+            $("#createShoppingListForm").submit(function () {
+                createShoppingList();
+                return false;
+            });
+        });
+
+        function loadData() {
+            $.ajax({
+                url: "/api/shoppinglists",
+                dataType: 'json',
+                contentType: 'application/json',
+                method: 'GET'
+            }).done(function (responseJSON, status, xhr) {
+                buildShoppingList(responseJSON);
+                buildPurchaseList(responseJSON);
+                $("#glist").on('click', 'a.shoppinglist-delete', function () {
+                    var id = $(this).parents("li").attr('shoppinglist-id');
+                    {
+                        deleteShoppingList(id);
+                    }
+                    return false;
+                });
+                $("#gpurchase").on('click', 'a.purchaselist-delete', function () {
+                    var id = $(this).parents("li").attr('shoppinglist-id');
+                    {
+                        deleteShoppingList(id);
+                    }
+                    return false;
+                });
+                $("#gpurchase").on('click', 'a.purchaselist-undo', function () {
+                    var id = $(this).parents("li").attr('shoppinglist-id');
+                    {
+                        undoPurchaseShoppingList(id);
+                    }
+                    return false;
+                });
+                $("#glist").on('click', 'a.shoppinglist-purchase', function () {
+                    $(this).parents("li").find('.purchase-form').show();
+                    return false;
+                });
+                $("#glist").on('click', 'button.purchase-cancel', function () {
+                    $(this).parents("li").find('.purchase-form').hide();
+                    return false;
+                });
+
+                $("#glist").on('click', 'button.purchase-save', function () {
+                    var id = $(this).parents("li").attr('shoppinglist-id');
+                    var name = $(this).parents("li").find('.purchase-form .purchase-name').val();
+                    purchaseShoppingList(id, name, function () {
+                        $(this).parents("li").find('.purchase-form').hide();
+                    });
+                    return false;
+                });
+            }).fail(function (xhr, status, error) {
+                alert("There was an error retrieving the data");
+            });
+        }
+
+        function buildShoppingList(shoppinglists) {
+            $("#glist").empty();
+            $.each(shoppinglists, function (index, item) {
+                if (item.buyer == null) {
+                    var li = $('<li shoppinglist-id="' + item.shoppingListId + '"></li>');
+                    $(li).text(item.productName + ' - ' + item.productQty);
+
+                    $(li).append('<span class="pull-right">&nbsp;|&nbsp;</span>');
+                    $(li).append('<a href="#" class="pull-right shoppinglist-purchase"> Purchase</a>');
+                    $(li).append('<span class="pull-right">&nbsp;|&nbsp;</span>');
+                    $(li).append(' <a href="#" class="pull-right shoppinglist-delete"> Delete</a>')
+
+                    var purchaseForm = $('<div style="display: none;" class="row purchase-form"></div>');
+                    var purchaseInput = $('<div class="col-sm-8"><input type="text" class="form-control purchase-name" placeholder="Who purchased the Item?" /></div>');
+                    var purchaseButton = $('<div class="col-sm-4"><button class="btn btn-primary purchase-save">Confirm Purchase</button> <button class="btn btn-default purchase-cancel">Cancel Purchase</button></div>');
+
+                    $(purchaseForm).append(purchaseInput);
+                    $(purchaseForm).append(purchaseButton);
+                    $(li).append(purchaseForm);
+
+                    $("#glist").append(li);
+                }
+            });
+        }
+
+        function buildPurchaseList(shoppinglists) {
+            $("#gpurchase").empty();
+            $.each(shoppinglists, function (index, item) {
+                if (item.buyer != null) {
+                    var li = $('<li shoppinglist-id="' + item.shoppingListId + '"></li>');
+                    $(li).text(item.productName + ' - ' + item.productQty + ' --> Purchased By  ' + item.buyer + ' on ' + item.datePurchased);
+                    $(li).css('color', 'green');
+
+                    $(li).append('<span class="pull-right">&nbsp;|&nbsp;</span>');
+                    $(li).append('<a href="#" class="pull-right purchaselist-undo"> Add to List</a>');
+                    $(li).append('<span class="pull-right">&nbsp;|&nbsp;</span>');
+                    $(li).append(' <a href="#" class="pull-right purchaselist-delete"> Delete</a>')
+
+
+                    $("#gpurchase").append(li);
+                }
+            });
+        }
+
+        function purchaseShoppingList(id, name, callback) {
+            var requestData = {
+                name: name
+            };
+            $.ajax({
+                url: '/api/shoppinglists/purchase/' + id,
+                dataType: 'json',
+                contentType: 'application/json',
+                method: 'PUT',
+                data: JSON.stringify(requestData)
+            }).done(function (responseData, status, xhr) {
+                loadData();
+                if (callback) {
+                    callback();
+                }
+                location.reload(true);
+            }).fail(function (xhr, status, error) {
+                alert("There was an error saving your purchased item");
+            });
+        }
+
+
+        function undoPurchaseShoppingList(id) {
+            $.ajax({
+                url: '/api/shoppinglists/purchase/' + id,
+                dataType: 'json',
+                contentType: 'application/json',
+                method: 'DELETE'
+            }).done(function (responseData, status, xhr) {
+                loadData(); 
+                location.reload(true);
+            }).fail(function (xhr, status, error) {
+                alert("There was an error adding this item to the list");
+            });
+        }
+
+        function deleteShoppingList(id) {
+            $.ajax({
+                url: '/api/shoppinglists/' + id,
+                dataType: 'json',
+                contentType: 'application/json',
+                method: 'DELETE',
+            }).done(function (responseData, status, xhr) {
+                loadData();
+                location.reload(true);
+            }).fail(function (xhr, status, error) {
+                alert("There was an error deleting the item");
+            });
+        }
+
+        function createShoppingList() {
+            var requestData = {
+                productName: $("#productName").val(),
+                productQty: $("#productQty").val()
+            };
+            $.ajax({
+                url: '/api/shoppinglists',
+                dataType: 'json',
+                contentType: 'application/json',
+                method: 'POST',
+                data: JSON.stringify(requestData)
+            }).done(function (responseData, status, xhr) {
+                loadData();
+                $("#productName").val("");
+                $("#productQty").val("");
+                location.reload(true);
+            }).fail(function (xhr, status, error) {
+                alert("There was an error saving your shopping list item");
+            });
+        }
+    </script>
+}

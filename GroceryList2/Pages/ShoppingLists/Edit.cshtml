@@ -1,0 +1,55 @@
+﻿@page
+@model GroceryList2.Pages.ShoppingLists.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>ShoppingList</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ShoppingList.ShoppingListId" />
+            <div class="form-group">
+                <label asp-for="ShoppingList.ProductName" class="control-label"></label>
+                <input asp-for="ShoppingList.ProductName" class="form-control" />
+                <span asp-validation-for="ShoppingList.ProductName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ShoppingList.ProductQty" class="control-label"></label>
+                <input asp-for="ShoppingList.ProductQty" class="form-control" />
+                <span asp-validation-for="ShoppingList.ProductQty" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="ShoppingList.Recipe" /> @Html.DisplayNameFor(model => model.ShoppingList.Recipe)
+                </label>
+            </div>
+            <div class="form-group">
+                <label asp-for="ShoppingList.Buyer" class="control-label"></label>
+                <input asp-for="ShoppingList.Buyer" class="form-control" />
+                <span asp-validation-for="ShoppingList.Buyer" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ShoppingList.DatePurchased" class="control-label"></label>
+                <input asp-for="ShoppingList.DatePurchased" class="form-control" />
+                <span asp-validation-for="ShoppingList.DatePurchased" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

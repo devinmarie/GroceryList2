@@ -1,0 +1,60 @@
+﻿@page
+@model GroceryList2.Pages.ShoppingLists.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ShoppingList[0].ProductName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ShoppingList[0].ProductQty)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ShoppingList[0].Recipe)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ShoppingList[0].Buyer)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ShoppingList[0].DatePurchased)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.ShoppingList) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ProductName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ProductQty)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Recipe)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Buyer)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DatePurchased)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.ShoppingListId">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.ShoppingListId">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.ShoppingListId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
