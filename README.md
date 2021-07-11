@@ -1,4 +1,4 @@
-# GroceryList2
+# IS8012 - A3 - GroceryList2
 
 This is an assignment for UC IS8012 demonstrating AJAX, jQuery and APIs.
 
