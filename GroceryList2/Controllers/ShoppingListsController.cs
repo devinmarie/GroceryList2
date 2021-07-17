@@ -119,6 +119,7 @@ namespace GroceryList2.Controllers
             {
                 return BadRequest();
             }
+
             item.DatePurchased = DateTime.Now;
             item.Buyer = purchase.Name;
             _context.SaveChanges();
@@ -130,15 +131,15 @@ namespace GroceryList2.Controllers
         public ActionResult<ShoppingList> PurchaseItem([FromRoute] int id)
         {
 
-            var book = _context.ShoppingList.Find(id);
-            if (book == null)
+            var item = _context.ShoppingList.Find(id);
+            if (item == null)
             {
                 return BadRequest();
             }
-            book.DatePurchased = null;
-            book.Buyer = null;
+            item.DatePurchased = null;
+            item.Buyer = null;
             _context.SaveChanges();
-            return Ok(book);
+            return Ok(item);
         }
 
     }

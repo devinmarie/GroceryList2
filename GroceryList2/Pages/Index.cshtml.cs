@@ -17,9 +17,11 @@ namespace GroceryList2.Pages
             _logger = logger;
         }
 
+        public bool IsMobile { get; set;}
         public void OnGet()
         {
-
+            var userAgent = Request.Headers["User-Agent"];
+            IsMobile = userAgent.ToString().Contains("mobile", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

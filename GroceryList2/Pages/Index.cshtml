@@ -4,9 +4,16 @@
     ViewData["Title"] = "Lally Shopping List";
 }
 
-<h1>Grocery Shopping List</h1>
+@if (Model.IsMobile)
+{
+    <h1>Grocery Shopping List App</h1>
+}
+else
+{
+    <h1>Grocery Shopping List</h1>
 
-<div>
+}
+<div id="shoppingForm">
     <hr />
     <form id="createShoppingListForm" class="form">
         <h3>Add to the List</h3>
@@ -29,6 +36,25 @@
 <h3>Grocery Items Purchased</h3>
 <ul id="gpurchase">
 </ul>
+<hr />
+@if (Model.IsMobile)
+{
+    <h3>Capture Grocery Store Address</h3>
+    <p>Select the button below while shopping to capture the address of the grocery store you are in.</p>
+
+    <div id="geoArea">
+        <button id="geoClick">Click for Address</button>
+        <h5 style="padding-top: 10px;" id="geoDetails">
+
+        </h5>
+    </div>
+}
+else
+{
+    <h3>Capture Grocery Store Address</h3>
+    <p>While shopping in store, you will be able to capture the grocery store address on your mobile device.</p>
+}
+
 
 
 @section Scripts {
@@ -89,6 +115,30 @@
                     });
                     return false;
                 });
+                $("#geoClick").click(function () {
+                    navigator.geolocation.getCurrentPosition(function (location) {
+                        var geocoder = new google.maps.Geocoder();
+                        var latLng = new google.maps.LatLng(
+                            location.coords.latitude,
+                            location.coords.longitude
+                        );
+                        geocoder.geocode(
+                            {
+                                latLng: latLng,
+                            },
+                            function (results, status) {
+                                for (var i = 0; i < results[0].address_components.length; i++) {
+                                    var address = results[0].address_components[i];
+                                    if (address.types[0] == "postal_code") {
+                                        $("#geoDetails").html(address.long_name);
+                                        $("#geoDetails").html(results[0].formatted_address);
+                                    }
+                                }
+                            }
+                        );
+                    })
+                    return false;
+                });
             }).fail(function (xhr, status, error) {
                 alert("There was an error retrieving the data");
             });
@@ -124,7 +174,8 @@
             $.each(shoppinglists, function (index, item) {
                 if (item.buyer != null) {
                     var li = $('<li shoppinglist-id="' + item.shoppingListId + '"></li>');
-                    $(li).text(item.productName + ' - ' + item.productQty + ' --> Purchased By  ' + item.buyer + ' on ' + item.datePurchased);
+                    var dateshort = String(item.datePurchased).substring(0, 10);
+                    $(li).text(item.productName + ' - ' + item.productQty + ' --> Purchased By  ' + item.buyer + ' on ' + dateshort);
                     $(li).css('color', 'green');
 
                     $(li).append('<span class="pull-right">&nbsp;|&nbsp;</span>');
@@ -167,7 +218,7 @@
                 contentType: 'application/json',
                 method: 'DELETE'
             }).done(function (responseData, status, xhr) {
-                loadData(); 
+                loadData();
                 location.reload(true);
             }).fail(function (xhr, status, error) {
                 alert("There was an error adding this item to the list");
