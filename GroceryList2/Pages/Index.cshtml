@@ -45,7 +45,6 @@ else
     <div id="geoArea">
         <button id="geoClick">Click for Address</button>
         <h5 style="padding-top: 10px;" id="geoDetails">
-
         </h5>
     </div>
 }
@@ -54,7 +53,7 @@ else
     <h3>Capture Grocery Store Address</h3>
     <p>While shopping in store, you will be able to capture the grocery store address on your mobile device.</p>
 }
-
+<hr />
 
 
 @section Scripts {
@@ -114,7 +113,7 @@ else
                         $(this).parents("li").find('.purchase-form').hide();
                     });
                     return false;
-                });
+                });             
                 $("#geoClick").click(function () {
                     navigator.geolocation.getCurrentPosition(function (location) {
                         var geocoder = new google.maps.Geocoder();
